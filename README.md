@@ -24,8 +24,8 @@ TODO
 ```
 visdom -logging_level WARNING & python train.py --num_epochs 200
 optional arguments:
---batch_size                  train batch size [default value is 64]
---num_epochs                  train epochs number [default value is 80]
+--batch_size                  train batch size [default value is 32]
+--num_epochs                  train epochs number [default value is 100]
 ```
 Visdom now can be accessed by going to `127.0.0.1:8097` in your browser.
 
