@@ -12,8 +12,6 @@ from tqdm import tqdm
 import utils
 from model import Network
 
-torch.manual_seed(10)
-
 
 def processor(sample):
     data, labels, training = sample
@@ -72,19 +70,18 @@ def on_end_epoch(state):
 
     # save model
     torch.save(model.state_dict(), 'epochs/%d.pth' % (state['epoch']))
-    # save statistics at every 10 epochs
-    if state['epoch'] % 10 == 0:
-        data_frame = pd.DataFrame(
-            data={'train_loss': results['train_loss'], 'train_accuracy': results['train_accuracy'],
-                  'test_loss': results['test_loss'], 'test_accuracy': results['test_accuracy']},
-            index=range(1, state['epoch'] + 1))
-        data_frame.to_csv('statistics/results.csv', index_label='epoch')
+    # save statistics
+    data_frame = pd.DataFrame(
+        data={'train_loss': results['train_loss'], 'train_accuracy': results['train_accuracy'],
+              'test_loss': results['test_loss'], 'test_accuracy': results['test_accuracy']},
+        index=range(1, state['epoch'] + 1))
+    data_frame.to_csv('statistics/results.csv', index_label='epoch')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train Activity Recognition Model')
-    parser.add_argument('--batch_size', default=64, type=int, help='training batch size')
-    parser.add_argument('--num_epochs', default=80, type=int, help='train epoch number')
+    parser.add_argument('--batch_size', default=32, type=int, help='training batch size')
+    parser.add_argument('--num_epochs', default=100, type=int, help='train epoch number')
 
     opt = parser.parse_args()
 
@@ -97,7 +94,7 @@ if __name__ == '__main__':
     train_loader, test_loader = utils.load_data(batch_size=BATCH_SIZE)
     model = Network().to(DEVICE)
     loss_criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(params=model.parameters(), lr=0.01, momentum=0.9)
+    optimizer = optim.Adam(params=model.parameters())
     print("# parameters:", sum(param.numel() for param in model.parameters()))
 
     engine = Engine()
