@@ -18,7 +18,7 @@ class VideoData(Dataset):
         return len(self.samples)
 
 
-def load_data(batch_size=64):
+def load_data(batch_size=32):
     train_set = VideoData('data/train', transforms.ToTensor())
     test_set = VideoData('data/test', transforms.ToTensor())
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, drop_last=True)
