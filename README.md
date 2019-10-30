@@ -75,7 +75,7 @@ To train a model, run
 python train_net.py --config-file <config.yaml>
 ```
 
-For example, to launch end-to-end DANet training with ResNet-50 backbone on 8 GPUs, one should execute:
+For example, to launch end-to-end EMANet training with ResNet-50 backbone on 8 GPUs, one should execute:
 ```bash
 python train_net.py --config-file configs/r50.yaml --num-gpus 8
 ```
@@ -92,32 +92,58 @@ There are some difference between this implementation and official implementatio
 2. The image sizes of `Multi-Scale Training` are (800, 832, 864, 896, 928, 960);
 3. Training step is set to `24000`;
 4. Learning rate policy is `WarmupMultiStepLR`;
-5. `Position Attention Module (PAM)` use the similar mechanism as `Channel Attention Module (CAM)`, just use the tensor
-and its transpose to compute the attention. 
+5. `Position Attention Module (PAM)` uses the similar mechanism as `Channel Attention Module (CAM)`, just uses the tensor
+and its transpose to compute attention. 
 
-
-<table><tbody>
-<!-- START TABLE -->
-<!-- TABLE HEADER -->
-<th valign="bottom">Name</th>
-<th valign="bottom">lr<br/>sched</th>
-<th valign="bottom">train<br/>time<br/>(s/iter)</th>
-<th valign="bottom">inference<br/>time<br/>(s/im)</th>
-<th valign="bottom">train<br/>mem<br/>(GB)</th>
-<th valign="bottom">box<br/>AP</th>
-<th valign="bottom">kp.<br/>AP</th>
-<th valign="bottom">model id</th>
-<th valign="bottom">download</th>
-<!-- TABLE BODY -->
-<!-- ROW: keypoint_rcnn_R_50_FPN_1x -->
- <tr><td align="left"><a href="configs/r50_fpn.yaml">R50-FPN</a></td>
-<td align="center">1x</td>
-<td align="center">0.315</td>
-<td align="center">0.102</td>
-<td align="center">5.0</td>
-<td align="center">53.6</td>
-<td align="center">64.0</td>
-<td align="center">137261548</td>
-<td align="center"><a href="https://dl.fbaipublicfiles.com/detectron2/COCO-Keypoints/keypoint_rcnn_R_50_FPN_1x/137261548/model_final_04e291.pkl">model</a>&nbsp;|&nbsp;<a href="https://dl.fbaipublicfiles.com/detectron2/COCO-Keypoints/keypoint_rcnn_R_50_FPN_1x/137261548/metrics.json">metrics</a></td>
-</tr>
-</tbody></table>
+<table>
+	<tbody>
+		<!-- START TABLE -->
+		<!-- TABLE HEADER -->
+		<th>Name</th>
+		<th>train time (s/iter)</th>
+		<th>inference time (s/im)</th>
+		<th>train mem (GB)</th>
+		<th>PA</br>%</th>
+		<th>mean PA %</th>
+		<th>mean IoU %</th>
+		<th>FW IoU %</th>
+		<th>download link</th>
+		<!-- TABLE BODY -->
+		<!-- ROW: r50 -->
+		<tr>
+			<td align="center"><a href="configs/r50.yaml">R50</a></td>
+			<td align="center">0.49</td>
+			<td align="center">0.12</td>
+			<td align="center">27.12</td>
+			<td align="center">94.19</td>
+			<td align="center">75.31</td>
+			<td align="center">66.64</td>
+			<td align="center">89.54</td>
+			<td align="center"><a href="https://pan.baidu.com/s/18wRQbLQyqXA4ISloUGWTSA">model</a>&nbsp;|&nbsp;ga7k</td>
+		</tr>
+		<!-- ROW: r101 -->
+		<tr>
+			<td align="center"><a href="configs/r101.yaml">R101</a></td>
+			<td align="center">0.65</td>
+			<td align="center">0.16</td>
+			<td align="center">28.81</td>
+			<td align="center">94.29</td>
+			<td align="center">76.08</td>
+			<td align="center">67.57</td>
+			<td align="center">89.69</td>
+			<td align="center"><a href="https://pan.baidu.com/s/1eqt2U2gIBeE_UMtluCKIcQ">model</a>&nbsp;|&nbsp;xnvs</td>
+		</tr>
+		<!-- ROW: r152 -->
+		<tr>
+			<td align="center"><a href="configs/r152.yaml">R152</a></td>
+			<td align="center">0.65</td>
+			<td align="center">0.16</td>
+			<td align="center">28.81</td>
+			<td align="center">94.29</td>
+			<td align="center">76.08</td>
+			<td align="center">67.57</td>
+			<td align="center">89.69</td>
+			<td align="center"><a href="https://pan.baidu.com/s/1eqt2U2gIBeE_UMtluCKIcQ">model</a>&nbsp;|&nbsp;xnvs</td>
+		</tr>
+	</tbody>
+</table>

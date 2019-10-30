@@ -1,16 +1,14 @@
 MODEL:
   META_ARCHITECTURE: "SemanticSegmentor"
   BACKBONE:
-    NAME: "build_resnet_fpn_backbone"
+    NAME: "build_dilated_resnet_backbone"
   RESNETS:
-    OUT_FEATURES: ["res2", "res3", "res4", "res5"]
-    FPN:
-      IN_FEATURES: ["res2", "res3", "res4", "res5"]
+    OUT_FEATURES: ["res5"]
   SEM_SEG_HEAD:
-    NAME: "SemSegFPNHead"
-    COMMON_STRIDE: 4
+    NAME: "EMANetHead"
+    COMMON_STRIDE: 8
     CONVS_DIM: 128
-    IN_FEATURES: ["p2", "p3", "p4", "p5"]
+    IN_FEATURES: ["res5"]
     NUM_CLASSES: 91
 SOLVER:
   BASE_LR: 0.02
