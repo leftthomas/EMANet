@@ -1,6 +1,0 @@
-_BASE_: "base.yaml"
-MODEL:
-  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
-  DILATED_RESNET:
-    DEPTH: 50
-OUTPUT_DIR: "./output/r50"

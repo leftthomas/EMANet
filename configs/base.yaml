@@ -2,25 +2,28 @@ MODEL:
   META_ARCHITECTURE: "SemanticSegmentor"
   BACKBONE:
     NAME: "build_dilated_resnet_backbone"
-  RESNETS:
+  DILATED_RESNET:
+    NORM: "SyncBN"
     OUT_FEATURES: ["res5"]
   SEM_SEG_HEAD:
-    NAME: "EMANetHead"
-    COMMON_STRIDE: 8
-    CONVS_DIM: 128
+    NAME: "EMAHead"
+    CONVS_DIM: 512
     IN_FEATURES: ["res5"]
-    NUM_CLASSES: 91
-SOLVER:
-  BASE_LR: 0.02
-  STEPS: (60000, 80000)
-  MAX_ITER: 90000
-  IMS_PER_BATCH: 16
 INPUT:
-  MIN_SIZE_TRAIN: (640, 672, 704, 736, 768, 800)
-DATASETS:
-  TRAIN: ("coco_2017_train_panoptic_stuffonly",)
-  TEST: ("coco_2017_val_panoptic_stuffonly",)
+  CROP:
+    ENABLED: True
+    TYPE: "absolute"
+    SIZE: [513, 513]
+DATALOADER:
+  NUM_WORKERS: 16
+SOLVER:
+  LR_SCHEDULER_NAME: "WarmupCosineLR"
+  BASE_LR: 9e-3
+  BIAS_LR_FACTOR: 2.0
+  WEIGHT_DECAY_BIAS: 0.0
+  MAX_ITER: 30000
+  IMS_PER_BATCH: 16
 TEST:
-  EVAL_PERIOD: 30
+  EVAL_PERIOD: 2000
 
 

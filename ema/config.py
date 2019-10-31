@@ -1,7 +1,7 @@
 from detectron2.config import CfgNode as CN
 
 
-def add_danet_config(cfg):
+def add_ema_config(cfg):
     """
     Add config for DANet.
     """

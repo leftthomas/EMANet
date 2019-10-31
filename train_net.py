@@ -12,11 +12,12 @@ this file as an example of how to use the library.
 You may want to write your own script with your datasets and other customizations.
 """
 
-import detectron2.utils.comm as comm
 import logging
 import os
-import torch
 from collections import OrderedDict
+
+import detectron2.utils.comm as comm
+import torch
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog
@@ -33,7 +34,7 @@ from detectron2.evaluation import (
 )
 from detectron2.modeling import GeneralizedRCNNWithTTA
 
-from ema import add_danet_config
+from ema import add_ema_config
 
 
 class Trainer(DefaultTrainer):
@@ -112,7 +113,7 @@ def setup(args):
     Create configs and perform basic setups.
     """
     cfg = get_cfg()
-    add_danet_config(cfg)
+    add_ema_config(cfg)
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()

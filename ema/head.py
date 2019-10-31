@@ -9,7 +9,7 @@ from torch.nn import functional as F
 
 
 @SEM_SEG_HEADS_REGISTRY.register()
-class EMANetHead(nn.Module):
+class EMAHead(nn.Module):
     def __init__(self, cfg, input_shape: Dict[str, ShapeSpec]):
         super().__init__()
 

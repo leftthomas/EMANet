@@ -1,3 +1,3 @@
 from .backbone import build_dilated_resnet_backbone
-from .config import add_danet_config
-from .head import EMANetHead
+from .config import add_ema_config
+from .head import EMAHead
