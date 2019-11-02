@@ -6,7 +6,6 @@ MODEL:
     NORM: "SyncBN"
   SEM_SEG_HEAD:
     NAME: "EMAHead"
-    CONVS_DIM: 512
 INPUT:
   CROP:
     ENABLED: True
