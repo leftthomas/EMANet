@@ -24,7 +24,6 @@ class EMASegmentor(nn.Module):
         pixel_mean = torch.Tensor(cfg.MODEL.PIXEL_MEAN).to(self.device).view(-1, 1, 1)
         pixel_std = torch.Tensor(cfg.MODEL.PIXEL_STD).to(self.device).view(-1, 1, 1)
         self.normalizer = lambda x: (x - pixel_mean) / pixel_std
-        self.em_mom = cfg.MODEL.EMA.EM_MOM
 
         self.to(self.device)
 
@@ -58,14 +57,9 @@ class EMASegmentor(nn.Module):
             ).tensor
         else:
             targets = None
-        results, mu, losses = self.sem_seg_head(features, size, targets)
+        results, losses = self.sem_seg_head(features, size, targets)
 
         if self.training:
-            with torch.no_grad():
-                mu = mu.mean(dim=0, keepdim=True)
-                self.sem_seg_head.emau.mu *= self.em_mom
-                self.sem_seg_head.emau.mu += mu * (1 - self.em_mom)
-
             return losses
 
         processed_results = []
