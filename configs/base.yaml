@@ -4,11 +4,9 @@ MODEL:
     NAME: "build_dilated_resnet_backbone"
   DILATED_RESNET:
     NORM: "SyncBN"
-    OUT_FEATURES: ["res5"]
   SEM_SEG_HEAD:
     NAME: "EMAHead"
     CONVS_DIM: 512
-    IN_FEATURES: ["res5"]
 INPUT:
   CROP:
     ENABLED: True
