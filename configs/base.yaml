@@ -1,11 +1,12 @@
 MODEL:
-  META_ARCHITECTURE: "SemanticSegmentor"
+  META_ARCHITECTURE: "EMASegmentor"
   BACKBONE:
     NAME: "build_dilated_resnet_backbone"
   DILATED_RESNET:
     NORM: "SyncBN"
   SEM_SEG_HEAD:
     NAME: "EMAHead"
+    NORM: "SyncBN"
 INPUT:
   CROP:
     ENABLED: True

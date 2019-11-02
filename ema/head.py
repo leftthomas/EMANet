@@ -1,11 +1,76 @@
+import math
 from typing import Dict
 
 import fvcore.nn.weight_init as weight_init
-import numpy as np
-from detectron2.layers import Conv2d, ShapeSpec
+import torch
+from detectron2.layers import Conv2d, ShapeSpec, get_norm
 from detectron2.modeling.meta_arch.semantic_seg import SEM_SEG_HEADS_REGISTRY
 from torch import nn
 from torch.nn import functional as F
+
+
+class EMAUnit(nn.Module):
+    """The Expectation-Maximization Attention Unit (EMA Unit).
+    Arguments:
+        c (int): The input and output channel number.
+        k (int): The number of the bases.
+        iteration_num (int): The iteration number for EM.
+    """
+
+    def __init__(self, c, k, iteration_num=3, norm="BN"):
+        super(EMAUnit, self).__init__()
+        self.iteration_num = iteration_num
+
+        mu = torch.Tensor(1, c, k)
+        # init with Kaiming Norm
+        mu.normal_(0, math.sqrt(2. / k))
+        mu = self._l2norm(mu, dim=1)
+        self.register_buffer('mu', mu)
+
+        self.conv1 = Conv2d(c, c, kernel_size=1)
+        self.conv2 = Conv2d(c, c, kernel_size=1, bias=False, norm=get_norm(norm, c))
+        weight_init.c2_msra_fill(self.conv1)
+        weight_init.c2_msra_fill(self.conv2)
+
+    def forward(self, x):
+        idn = x
+        x = self.conv1(x)
+
+        # the EM Attention
+        b, c, h, w = x.size()
+        x = x.view(b, c, h * w)  # b * c * n
+        mu = self.mu.repeat(b, 1, 1)  # b * c * k
+        with torch.no_grad():
+            for i in range(self.iteration_num):
+                x_t = x.permute(0, 2, 1)  # b * n * c
+                z = torch.bmm(x_t, mu)  # b * n * k
+                z = F.softmax(z, dim=2)  # b * n * k
+                z_ = z / (1e-6 + z.sum(dim=1, keepdim=True))
+                mu = torch.bmm(x, z_)  # b * c * k
+                mu = self._l2norm(mu, dim=1)
+
+        z_t = z.permute(0, 2, 1)  # b * k * n
+        x = mu.matmul(z_t)  # b * c * n
+        x = x.view(b, c, h, w)  # b * c * h * w
+        x = F.relu(x, inplace=True)
+
+        x = self.conv2(x)
+        x = x + idn
+        x = F.relu(x, inplace=True)
+
+        return x, mu
+
+    def _l2norm(self, inp, dim):
+        """Normlize the inp tensor with l2-norm.
+        Returns a tensor where each sub-tensor of input along the given dim is
+        normalized such that the 2-norm of the sub-tensor is equal to 1.
+        Arguments:
+            inp (tensor): The input tensor.
+            dim (int): The dimension to slice over to get the sub-tensors.
+        Returns:
+            (tensor) The normalized tensor.
+        """
+        return inp / (1e-6 + inp.norm(dim=dim, keepdim=True))
 
 
 @SEM_SEG_HEADS_REGISTRY.register()
@@ -14,61 +79,34 @@ class EMAHead(nn.Module):
         super().__init__()
 
         # fmt: off
-        self.in_features = cfg.MODEL.SEM_SEG_HEAD.IN_FEATURES
         feature_strides = {k: v.stride for k, v in input_shape.items()}
         feature_channels = {k: v.channels for k, v in input_shape.items()}
+        assert len(feature_strides) == 1
+        assert len(feature_channels) == 1
         self.ignore_value = cfg.MODEL.SEM_SEG_HEAD.IGNORE_VALUE
         num_classes = cfg.MODEL.SEM_SEG_HEAD.NUM_CLASSES
-        conv_dims = cfg.MODEL.SEM_SEG_HEAD.CONVS_DIM
-        self.common_stride = cfg.MODEL.SEM_SEG_HEAD.COMMON_STRIDE
         norm = cfg.MODEL.SEM_SEG_HEAD.NORM
+        iteration_num = cfg.MODEL.SEM_SEG_HEAD.ITERATION_NUM
         # fmt: on
 
-        self.scale_heads = []
-        for in_feature in self.in_features:
-            head_ops = []
-            head_length = max(
-                1, int(np.log2(feature_strides[in_feature]) - np.log2(self.common_stride))
-            )
-            for k in range(head_length):
-                norm_module = nn.GroupNorm(32, conv_dims) if norm == "GN" else None
-                conv = Conv2d(
-                    feature_channels[in_feature] if k == 0 else conv_dims,
-                    conv_dims,
-                    kernel_size=3,
-                    stride=1,
-                    padding=1,
-                    bias=not norm,
-                    norm=norm_module,
-                    activation=F.relu,
-                )
-                weight_init.c2_msra_fill(conv)
-                head_ops.append(conv)
-                if feature_strides[in_feature] != self.common_stride:
-                    head_ops.append(
-                        nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False)
-                    )
-            self.scale_heads.append(nn.Sequential(*head_ops))
-            self.add_module(in_feature, self.scale_heads[-1])
-
-        self.predictor = Conv2d(conv_dims, num_classes, kernel_size=1, stride=1, padding=0)
+        self.reduced_conv = Conv2d(2048, 512, kernel_size=3, stride=1, padding=1, bias=False, norm=get_norm(norm, 512),
+                                   activation=F.relu)
+        self.emau = EMAUnit(512, 64, iteration_num, norm)
+        self.predictor = nn.Sequential(
+            Conv2d(512, 256, kernel_size=3, stride=1, padding=1, bias=False, norm=get_norm(norm, 256),
+                   activation=F.relu), nn.Dropout2d(p=0.1), Conv2d(256, num_classes, kernel_size=1))
+        weight_init.c2_msra_fill(self.reduced_conv)
         weight_init.c2_msra_fill(self.predictor)
 
-    def forward(self, features, targets=None):
-        for i, f in enumerate(self.in_features):
-            if i == 0:
-                x = self.scale_heads[i](features[f])
-            else:
-                x = x + self.scale_heads[i](features[f])
-
-        # TODO
-
+    def forward(self, features, size, targets=None):
+        x = self.reduced_conv(features)
+        x, mu = self.emau(x)
         x = self.predictor(x)
-        x = F.interpolate(x, scale_factor=self.common_stride, mode="bilinear", align_corners=False)
+
+        x = F.interpolate(x, size=size, mode='bilinear', align_corners=True)
 
         if self.training:
-            losses = {}
-            losses["loss_sem_seg"] = (F.cross_entropy(x, targets, reduction="mean", ignore_index=self.ignore_value))
-            return [], losses
+            losses = {"loss_sem_seg": (F.cross_entropy(x, targets, reduction="mean", ignore_index=self.ignore_value))}
+            return [], mu, losses
         else:
-            return x, {}
+            return x, mu, {}
