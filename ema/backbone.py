@@ -21,19 +21,22 @@ class BasicStem(nn.Module):
                 (one of {"FrozenBN", "BN", "GN"}).
         """
         super().__init__()
-        self.conv1 = Conv2d(
-            in_channels,
-            out_channels,
-            kernel_size=7,
-            stride=2,
-            padding=3,
-            bias=False,
-            norm=get_norm(norm, out_channels),
-        )
+        self.conv1 = Conv2d(in_channels, out_channels // 2, kernel_size=3, stride=2, padding=1, bias=False,
+                            norm=get_norm(norm, out_channels // 2))
+        self.conv2 = Conv2d(out_channels // 2, out_channels // 2, kernel_size=3, stride=1, padding=1, bias=False,
+                            norm=get_norm(norm, out_channels // 2))
+        self.conv3 = Conv2d(out_channels // 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False,
+                            norm=get_norm(norm, out_channels))
         weight_init.c2_msra_fill(self.conv1)
+        weight_init.c2_msra_fill(self.conv2)
+        weight_init.c2_msra_fill(self.conv3)
 
     def forward(self, x):
         x = self.conv1(x)
+        x = F.relu_(x)
+        x = self.conv2(x)
+        x = F.relu_(x)
+        x = self.conv3(x)
         x = F.relu_(x)
         x = F.max_pool2d(x, kernel_size=3, stride=2, padding=1)
         return x

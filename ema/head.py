@@ -79,10 +79,6 @@ class EMAHead(nn.Module):
         super().__init__()
 
         # fmt: off
-        feature_strides = {k: v.stride for k, v in input_shape.items()}
-        feature_channels = {k: v.channels for k, v in input_shape.items()}
-        assert len(feature_strides) == 1
-        assert len(feature_channels) == 1
         self.ignore_value = cfg.MODEL.SEM_SEG_HEAD.IGNORE_VALUE
         num_classes = cfg.MODEL.SEM_SEG_HEAD.NUM_CLASSES
         norm = cfg.MODEL.SEM_SEG_HEAD.NORM
@@ -96,10 +92,12 @@ class EMAHead(nn.Module):
             Conv2d(512, 256, kernel_size=3, stride=1, padding=1, bias=False, norm=get_norm(norm, 256),
                    activation=F.relu), nn.Dropout2d(p=0.1), Conv2d(256, num_classes, kernel_size=1))
         weight_init.c2_msra_fill(self.reduced_conv)
-        weight_init.c2_msra_fill(self.predictor)
+        for module in self.predictor:
+            if isinstance(module, Conv2d):
+                weight_init.c2_msra_fill(module)
 
     def forward(self, features, size, targets=None):
-        x = self.reduced_conv(features)
+        x = self.reduced_conv(features['res5'])
         x, mu = self.emau(x)
         x = self.predictor(x)
 

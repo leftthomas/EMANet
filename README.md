@@ -90,7 +90,9 @@ python train_net.py --config-file configs/r50_coco.yaml --num-gpus 8 --eval-only
 There are some difference between this implementation and official implementation:
 1. The image sizes of `Multi-Scale Training` are (640, 672, 704, 736, 768, 800) for `coco` dataset;
 2. The image sizes of `Multi-Scale Training` are (800, 832, 864, 896, 928, 960, 992, 1024) for `cityscapes` dataset;
-3. Learning rate policy is `WarmupCosineLR`.
+3. No `RandomCrop` used;
+4. Learning rate policy is `WarmupCosineLR`;
+5. The ImageNet pretrained backbones borrowed from `detectron2`, not the official repo.
 
 ### COCO
 <table>

@@ -7,11 +7,6 @@ MODEL:
   SEM_SEG_HEAD:
     NAME: "EMAHead"
     NORM: "SyncBN"
-INPUT:
-  CROP:
-    ENABLED: True
-    TYPE: "absolute"
-    SIZE: [513, 513]
 DATALOADER:
   NUM_WORKERS: 16
 SOLVER:
