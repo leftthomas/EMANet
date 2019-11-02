@@ -41,14 +41,14 @@ class EMAUnit(nn.Module):
         b, c, h, w = x.size()
         x = x.view(b, c, h * w)  # b * c * n
         mu = self.mu.repeat(b, 1, 1)  # b * c * k
-        with torch.no_grad():
-            for i in range(self.iteration_num):
-                x_t = x.permute(0, 2, 1)  # b * n * c
-                z = torch.bmm(x_t, mu)  # b * n * k
-                z = F.softmax(z, dim=2)  # b * n * k
-                z_ = z / (1e-6 + z.sum(dim=1, keepdim=True))
-                mu = torch.bmm(x, z_)  # b * c * k
-                mu = self._l2norm(mu, dim=1)
+
+        for i in range(self.iteration_num):
+            x_t = x.permute(0, 2, 1)  # b * n * c
+            z = torch.bmm(x_t, mu)  # b * n * k
+            z = F.softmax(z, dim=2)  # b * n * k
+            z_ = z / (1e-6 + z.sum(dim=1, keepdim=True))
+            mu = torch.bmm(x.detach(), z_.detach())  # b * c * k
+            mu = self._l2norm(mu, dim=1)
 
         z_t = z.permute(0, 2, 1)  # b * k * n
         x = mu.matmul(z_t)  # b * c * n
@@ -60,10 +60,9 @@ class EMAUnit(nn.Module):
         x = F.relu(x, inplace=True)
 
         if self.training:
-            with torch.no_grad():
-                mu = mu.mean(dim=0, keepdim=True)
-                self.mu *= self.em_mom
-                self.mu += mu * (1 - self.em_mom)
+            mu = mu.mean(dim=0, keepdim=True)
+            self.mu *= self.em_mom
+            self.mu += mu * (1 - self.em_mom)
 
         return x
 
