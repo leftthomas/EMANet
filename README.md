@@ -166,13 +166,13 @@ There are some difference between this implementation and official implementatio
 		<!-- ROW: r50 -->
 		<tr>
 			<td align="center"><a href="configs/r50_cityscapes.yaml">R50</a></td>
-			<td align="center">0.49</td>
-			<td align="center">0.12</td>
-			<td align="center">27.12</td>
-			<td align="center">94.19</td>
-			<td align="center">75.31</td>
-			<td align="center">66.64</td>
-			<td align="center">89.54</td>
+			<td align="center">0.78</td>
+			<td align="center">0.11</td>
+			<td align="center">11.22</td>
+			<td align="center">94.43</td>
+			<td align="center">76.19</td>
+			<td align="center">67.70</td>
+			<td align="center">89.93</td>
 			<td align="center"><a href="https://pan.baidu.com/s/18wRQbLQyqXA4ISloUGWTSA">model</a>&nbsp;|&nbsp;ga7k</td>
 		</tr>
 		<!-- ROW: r101 -->
