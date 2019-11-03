@@ -173,7 +173,7 @@ There are some difference between this implementation and official implementatio
 			<td align="center">76.19</td>
 			<td align="center">67.70</td>
 			<td align="center">89.93</td>
-			<td align="center"><a href="https://pan.baidu.com/s/18wRQbLQyqXA4ISloUGWTSA">model</a>&nbsp;|&nbsp;ga7k</td>
+			<td align="center"><a href="https://pan.baidu.com/s/11gEaJzTf1wijPf1Stn2GIA">model</a>&nbsp;|&nbsp;vqup</td>
 		</tr>
 		<!-- ROW: r101 -->
 		<tr>
