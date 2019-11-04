@@ -178,14 +178,14 @@ There are some difference between this implementation and official implementatio
 		<!-- ROW: r101 -->
 		<tr>
 			<td align="center"><a href="configs/r101_cityscapes.yaml">R101</a></td>
-			<td align="center">0.65</td>
-			<td align="center">0.16</td>
-			<td align="center">28.81</td>
-			<td align="center">94.29</td>
-			<td align="center">76.08</td>
-			<td align="center">67.57</td>
-			<td align="center">89.69</td>
-			<td align="center"><a href="https://pan.baidu.com/s/1eqt2U2gIBeE_UMtluCKIcQ">model</a>&nbsp;|&nbsp;xnvs</td>
+			<td align="center">1.10</td>
+			<td align="center">0.14</td>
+			<td align="center">14.70</td>
+			<td align="center">94.40</td>
+			<td align="center">75.30</td>
+			<td align="center">66.82</td>
+			<td align="center">89.88</td>
+			<td align="center"><a href="https://pan.baidu.com/s/11p-tu7zE9MNPTN4JkKVD4Q">model</a>&nbsp;|&nbsp;4up9</td>
 		</tr>
 		<!-- ROW: r152 -->
 		<tr>
