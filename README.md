@@ -112,14 +112,14 @@ There are some difference between this implementation and official implementatio
 		<!-- ROW: r50 -->
 		<tr>
 			<td align="center"><a href="configs/r50_coco.yaml">R50</a></td>
-			<td align="center">0.49</td>
-			<td align="center">0.12</td>
-			<td align="center">27.12</td>
-			<td align="center">94.19</td>
-			<td align="center">75.31</td>
-			<td align="center">66.64</td>
-			<td align="center">89.54</td>
-			<td align="center"><a href="https://pan.baidu.com/s/18wRQbLQyqXA4ISloUGWTSA">model</a>&nbsp;|&nbsp;ga7k</td>
+			<td align="center">1.04</td>
+			<td align="center">0.11</td>
+			<td align="center">11.14</td>
+			<td align="center">79.16</td>
+			<td align="center">50.64</td>
+			<td align="center">39.67</td>
+			<td align="center">66.77</td>
+			<td align="center"><a href="https://pan.baidu.com/s/1F9GmNHqeVQUXYGM1wZKiiA">model</a>&nbsp;|&nbsp;h94c</td>
 		</tr>
 		<!-- ROW: r101 -->
 		<tr>
