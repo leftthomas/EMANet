@@ -190,14 +190,14 @@ There are some difference between this implementation and official implementatio
 		<!-- ROW: r152 -->
 		<tr>
 			<td align="center"><a href="configs/r152_cityscapes.yaml">R152</a></td>
-			<td align="center">0.65</td>
+			<td align="center">1.35</td>
 			<td align="center">0.16</td>
-			<td align="center">28.81</td>
-			<td align="center">94.29</td>
-			<td align="center">76.08</td>
-			<td align="center">67.57</td>
-			<td align="center">89.69</td>
-			<td align="center"><a href="https://pan.baidu.com/s/1eqt2U2gIBeE_UMtluCKIcQ">model</a>&nbsp;|&nbsp;xnvs</td>
+			<td align="center">18.87</td>
+			<td align="center">94.80</td>
+			<td align="center">78.21</td>
+			<td align="center">70.06</td>
+			<td align="center">90.52</td>
+			<td align="center"><a href="https://pan.baidu.com/s/1PsAnXAv3dTI4gKi87rZjMQ">model</a>&nbsp;|&nbsp;y82y</td>
 		</tr>
 	</tbody>
 </table>
