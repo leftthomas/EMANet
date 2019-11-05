@@ -69,6 +69,11 @@ cityscapes/
 ```
 run `./datasets/prepare_cityscapes.py` to creat `labelTrainIds.png`.
 
+Before training, the pre-trained backbone models ([ResNet50](https://hangzh.s3.amazonaws.com/encoding/models/resnet50-25c4b509.zip), 
+[ResNet101](https://hangzh.s3.amazonaws.com/encoding/models/resnet101-2a57e44d.zip) and 
+[ResNet152](https://hangzh.s3.amazonaws.com/encoding/models/resnet152-0d43d698.zip)) on ImageNet should be downloaded 
+and unzipped into `epochs`.  
+
 ## Training
 To train a model, run
 ```bash
