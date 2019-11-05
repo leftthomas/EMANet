@@ -93,7 +93,7 @@ class DilatedResNet(Backbone):
                                            multi_grid=True)
 
         self._out_feature_strides = {"res5": stride}
-        self._out_feature_channels = {"res5": self.layer4.out_channels}
+        self._out_feature_channels = {"res5": 512 * Bottleneck.expansion}
         self._out_features = ["res5"]
 
         for m in self.modules():
