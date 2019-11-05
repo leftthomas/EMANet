@@ -1,4 +1,6 @@
 import torch
+from detectron2.layers.batch_norm import NaiveSyncBatchNorm
+from detectron2.layers.wrappers import BatchNorm2d
 from detectron2.modeling.backbone import build_backbone
 from detectron2.modeling.meta_arch.build import META_ARCH_REGISTRY
 from detectron2.modeling.meta_arch.semantic_seg import build_sem_seg_head
@@ -69,3 +71,23 @@ class EMASegmentor(nn.Module):
             r = sem_seg_postprocess(result, image_size, height, width)
             processed_results.append({"sem_seg": r})
         return processed_results
+
+
+def get_norm(norm, out_channels, momentum):
+    """
+    Args:
+        :param norm:
+        :param momentum:
+        :param out_channels:
+
+    Returns:
+        nn.Module or None: the normalization layer
+    """
+    if isinstance(norm, str):
+        if len(norm) == 0:
+            return None
+        norm = {
+            "BN": BatchNorm2d,
+            "SyncBN": NaiveSyncBatchNorm,
+        }[norm]
+    return norm(out_channels, momentum=momentum)

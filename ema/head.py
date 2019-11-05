@@ -3,10 +3,12 @@ from typing import Dict
 
 import fvcore.nn.weight_init as weight_init
 import torch
-from detectron2.layers import Conv2d, ShapeSpec, get_norm
+from detectron2.layers import Conv2d, ShapeSpec
 from detectron2.modeling.meta_arch.semantic_seg import SEM_SEG_HEADS_REGISTRY
 from torch import nn
 from torch.nn import functional as F
+
+from .arch import get_norm
 
 
 class EMAUnit(nn.Module):
@@ -17,7 +19,7 @@ class EMAUnit(nn.Module):
         iteration_num (int): The iteration number for EM.
     """
 
-    def __init__(self, c, k, iteration_num=3, em_mom=0.9, norm="BN"):
+    def __init__(self, c, k, iteration_num=3, em_mom=0.9, norm="BN", bn_mom=0.1):
         super(EMAUnit, self).__init__()
         self.iteration_num = iteration_num
 
@@ -29,7 +31,7 @@ class EMAUnit(nn.Module):
         self.em_mom = em_mom
 
         self.conv1 = Conv2d(c, c, kernel_size=1)
-        self.conv2 = Conv2d(c, c, kernel_size=1, bias=False, norm=get_norm(norm, c))
+        self.conv2 = Conv2d(c, c, kernel_size=1, bias=False, norm=get_norm(norm, c, bn_mom))
         weight_init.c2_msra_fill(self.conv1)
         weight_init.c2_msra_fill(self.conv2)
 
@@ -90,13 +92,14 @@ class EMAHead(nn.Module):
         norm = cfg.MODEL.SEM_SEG_HEAD.NORM
         iteration_num = cfg.MODEL.SEM_SEG_HEAD.ITERATION_NUM
         em_mom = cfg.MODEL.EMA.EM_MOM
+        bn_mom = cfg.MODEL.EMA.BN_MOM
         # fmt: on
 
-        self.reduced_conv = Conv2d(2048, 512, kernel_size=3, stride=1, padding=1, bias=False, norm=get_norm(norm, 512),
-                                   activation=F.relu)
-        self.emau = EMAUnit(512, 64, iteration_num, em_mom, norm)
+        self.reduced_conv = Conv2d(2048, 512, kernel_size=3, stride=1, padding=1, bias=False,
+                                   norm=get_norm(norm, 512, bn_mom), activation=F.relu)
+        self.emau = EMAUnit(512, 64, iteration_num, em_mom, norm, bn_mom)
         self.predictor = nn.Sequential(
-            Conv2d(512, 256, kernel_size=3, stride=1, padding=1, bias=False, norm=get_norm(norm, 256),
+            Conv2d(512, 256, kernel_size=3, stride=1, padding=1, bias=False, norm=get_norm(norm, 256, bn_mom),
                    activation=F.relu), nn.Dropout2d(p=0.1), Conv2d(256, num_classes, kernel_size=1))
         weight_init.c2_msra_fill(self.reduced_conv)
         for module in self.predictor:

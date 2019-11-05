@@ -1,24 +1,21 @@
 import fvcore.nn.weight_init as weight_init
 import numpy as np
 import torch.nn.functional as F
-from detectron2.layers import (
-    Conv2d,
-    FrozenBatchNorm2d,
-    ShapeSpec,
-    get_norm,
-)
+from detectron2.layers import Conv2d, FrozenBatchNorm2d, ShapeSpec
 from detectron2.modeling.backbone import Backbone
 from detectron2.modeling.backbone.build import BACKBONE_REGISTRY
 from torch import nn
 
+from .arch import get_norm
+
 
 class BasicStem(nn.Module):
-    def __init__(self, in_channels=3, out_channels=64, norm="BN"):
+    def __init__(self, in_channels=3, out_channels=64, norm="BN", bn_mom=0.1):
         """
         Args:
             norm (str or callable): a callable that takes the number of
                 channels and return a `nn.Module`, or a pre-defined string
-                (one of {"FrozenBN", "BN", "GN"}).
+                (one of {"BN", "SyncBN"}).
         """
         super().__init__()
 
@@ -26,17 +23,18 @@ class BasicStem(nn.Module):
 
         self.conv1 = nn.Sequential(
             Conv2d(in_channels, out_channels // 2, kernel_size=3, stride=2, padding=1, bias=False,
-                   norm=get_norm(norm, out_channels // 2)),
+                   norm=get_norm(norm, out_channels // 2, bn_mom)),
             nn.ReLU(inplace=True),
             Conv2d(out_channels // 2, out_channels // 2, kernel_size=3, stride=1, padding=1, bias=False,
-                   norm=get_norm(norm, out_channels // 2)),
+                   norm=get_norm(norm, out_channels // 2, bn_mom)),
             nn.ReLU(inplace=True),
             Conv2d(out_channels // 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False,
-                   norm=get_norm(norm, out_channels)),
+                   norm=get_norm(norm, out_channels, bn_mom)),
         )
 
-        for m in self.modules():
-            weight_init.c2_msra_fill(m)
+        for module in self.modules():
+            if isinstance(module, Conv2d):
+                weight_init.c2_msra_fill(module)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -71,27 +69,27 @@ class ResNetBlockBase(nn.Module):
 
 
 class BottleneckBlock(ResNetBlockBase):
-    def __init__(self, inplanes, planes, stride=1, norm="BN", dilation=1):
+    def __init__(self, inplanes, planes, stride=1, norm="BN", bn_mom=0.1, dilation=1):
         """
         Args:
             norm (str or callable): a callable that takes the number of
                 channels and return a `nn.Module`, or a pre-defined string
-                (one of {"FrozenBN", "BN", "GN", "SyncBN"}).
+                (one of {"BN", "SyncBN"}).
         """
         super().__init__(inplanes, planes * 4, stride)
 
         if stride != 1 or inplanes != planes * 4:
             self.shortcut = Conv2d(inplanes, planes * 4, kernel_size=1, stride=stride, bias=False,
-                                   norm=get_norm(norm, planes * 4))
+                                   norm=get_norm(norm, planes * 4, bn_mom))
         else:
             self.shortcut = None
 
-        self.conv1 = Conv2d(inplanes, planes, kernel_size=1, bias=False, norm=get_norm(norm, planes))
+        self.conv1 = Conv2d(inplanes, planes, kernel_size=1, bias=False, norm=get_norm(norm, planes, bn_mom))
 
         self.conv2 = Conv2d(planes, planes, kernel_size=3, stride=stride, padding=dilation, bias=False,
-                            dilation=dilation, norm=get_norm(norm, planes))
+                            dilation=dilation, norm=get_norm(norm, planes, bn_mom))
 
-        self.conv3 = Conv2d(planes, planes * 4, kernel_size=1, bias=False, norm=get_norm(norm, planes * 4))
+        self.conv3 = Conv2d(planes, planes * 4, kernel_size=1, bias=False, norm=get_norm(norm, planes * 4, bn_mom))
 
         for layer in [self.conv1, self.conv2, self.conv3, self.shortcut]:
             if layer is not None:  # shortcut can be None
@@ -116,20 +114,20 @@ class BottleneckBlock(ResNetBlockBase):
         return out
 
 
-def make_stage(inplanes, planes, blocks, stride=1, dilation=1, norm="BN", grids=None):
+def make_stage(inplanes, planes, blocks, stride=1, dilation=1, norm="BN", bn_mom=0.1, grids=None):
     layers = []
     if grids is None:
         grids = [1] * blocks
 
     if dilation == 1 or dilation == 2:
-        layers.append(BottleneckBlock(inplanes, planes, stride, norm=norm, dilation=1))
+        layers.append(BottleneckBlock(inplanes, planes, stride, norm=norm, bn_mom=bn_mom, dilation=1))
     elif dilation == 4:
-        layers.append(BottleneckBlock(inplanes, planes, stride, norm=norm, dilation=2))
+        layers.append(BottleneckBlock(inplanes, planes, stride, norm=norm, bn_mom=bn_mom, dilation=2))
     else:
         raise RuntimeError('=> unknown dilation size: {}'.format(dilation))
 
     for i in range(1, blocks):
-        layers.append(BottleneckBlock(planes * 4, planes, norm=norm, dilation=dilation * grids[i]))
+        layers.append(BottleneckBlock(planes * 4, planes, norm=norm, bn_mom=bn_mom, dilation=dilation * grids[i]))
 
     return layers
 
@@ -218,22 +216,25 @@ def build_dilated_resnet_backbone(cfg, input_shape):
     norm = cfg.MODEL.DILATED_RESNET.NORM
     depth = cfg.MODEL.DILATED_RESNET.DEPTH
     stride = cfg.MODEL.DILATED_RESNET.STRIDE
+    bn_mom = cfg.MODEL.EMA.BN_MOM
     # fmt: on
 
-    stem = BasicStem(in_channels=input_shape.channels, out_channels=128, norm=norm)
+    stem = BasicStem(in_channels=input_shape.channels, out_channels=128, norm=norm, bn_mom=bn_mom)
 
     num_blocks_per_stage = {50: [3, 4, 6, 3], 101: [3, 4, 23, 3], 152: [3, 8, 36, 3]}[depth]
 
     stages = []
-    layer1 = make_stage(128, 64, num_blocks_per_stage[0], norm=norm)
-    layer2 = make_stage(64 * 4, 128, num_blocks_per_stage[1], stride=2, norm=norm)
+    layer1 = make_stage(128, 64, num_blocks_per_stage[0], norm=norm, bn_mom=bn_mom)
+    layer2 = make_stage(64 * 4, 128, num_blocks_per_stage[1], stride=2, norm=norm, bn_mom=bn_mom)
 
     if stride == 16:
-        layer3 = make_stage(128 * 4, 256, num_blocks_per_stage[2], stride=2, norm=norm)
-        layer4 = make_stage(256 * 4, 512, num_blocks_per_stage[3], stride=1, norm=norm, dilation=2, grids=[1, 2, 4])
+        layer3 = make_stage(128 * 4, 256, num_blocks_per_stage[2], stride=2, norm=norm, bn_mom=bn_mom)
+        layer4 = make_stage(256 * 4, 512, num_blocks_per_stage[3], stride=1, norm=norm, bn_mom=bn_mom, dilation=2,
+                            grids=[1, 2, 4])
     elif stride == 8:
-        layer3 = make_stage(128 * 4, 256, num_blocks_per_stage[2], stride=1, norm=norm, dilation=2)
-        layer4 = make_stage(256 * 4, 512, num_blocks_per_stage[3], stride=1, norm=norm, dilation=4, grids=[1, 2, 4])
+        layer3 = make_stage(128 * 4, 256, num_blocks_per_stage[2], stride=1, norm=norm, bn_mom=bn_mom, dilation=2)
+        layer4 = make_stage(256 * 4, 512, num_blocks_per_stage[3], stride=1, norm=norm, bn_mom=bn_mom, dilation=4,
+                            grids=[1, 2, 4])
     else:
         raise RuntimeError('=> unknown stride size: {}'.format(stride))
     stages.append(layer1)
