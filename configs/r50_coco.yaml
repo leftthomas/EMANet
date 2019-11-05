@@ -1,6 +1,6 @@
 _BASE_: "base.yaml"
 MODEL:
-  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+  WEIGHTS: "./epochs/resnet50-25c4b509.pth"
   DILATED_RESNET:
     DEPTH: 50
     STRIDE: 8

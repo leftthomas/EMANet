@@ -1,5 +1,7 @@
 MODEL:
   META_ARCHITECTURE: "EMASegmentor"
+  PIXEL_MEAN: [103.530, 116.280, 123.675]
+  PIXEL_STD: [57.375, 57.120, 58.395]
   BACKBONE:
     NAME: "build_dilated_resnet_backbone"
   DILATED_RESNET:
