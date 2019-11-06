@@ -119,11 +119,11 @@ There are some difference between this implementation and official implementatio
 			<td align="center">1.04</td>
 			<td align="center">0.11</td>
 			<td align="center">11.14</td>
-			<td align="center">79.16</td>
-			<td align="center">50.64</td>
-			<td align="center">39.67</td>
-			<td align="center">66.77</td>
-			<td align="center"><a href="https://pan.baidu.com/s/1F9GmNHqeVQUXYGM1wZKiiA">model</a>&nbsp;|&nbsp;h94c</td>
+			<td align="center">80.49</td>
+			<td align="center">53.92</td>
+			<td align="center">42.71</td>
+			<td align="center">68.69</td>
+			<td align="center"><a href="https://pan.baidu.com/s/1jP7zWezVPBZWx_9LjJCgWg">model</a>&nbsp;|&nbsp;xxi8</td>
 		</tr>
 		<!-- ROW: r101 -->
 		<tr>
@@ -170,14 +170,14 @@ There are some difference between this implementation and official implementatio
 		<!-- ROW: r50 -->
 		<tr>
 			<td align="center"><a href="configs/r50_cityscapes.yaml">R50</a></td>
-			<td align="center">0.78</td>
+			<td align="center">0.81</td>
 			<td align="center">0.11</td>
 			<td align="center">11.22</td>
-			<td align="center">94.43</td>
-			<td align="center">76.19</td>
-			<td align="center">67.70</td>
-			<td align="center">89.93</td>
-			<td align="center"><a href="https://pan.baidu.com/s/11gEaJzTf1wijPf1Stn2GIA">model</a>&nbsp;|&nbsp;vqup</td>
+			<td align="center">95.13</td>
+			<td align="center">80.01</td>
+			<td align="center">72.28</td>
+			<td align="center">91.09</td>
+			<td align="center"><a href="https://pan.baidu.com/s/1NPLplUoKDaTUHCM5Yd98Iw">model</a>&nbsp;|&nbsp;x2d5</td>
 		</tr>
 		<!-- ROW: r101 -->
 		<tr>
