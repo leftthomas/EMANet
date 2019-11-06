@@ -140,14 +140,14 @@ There are some difference between this implementation and official implementatio
 		<!-- ROW: r152 -->
 		<tr>
 			<td align="center"><a href="configs/r152_coco.yaml">R152</a></td>
-			<td align="center">0.65</td>
-			<td align="center">0.16</td>
-			<td align="center">28.81</td>
-			<td align="center">94.29</td>
-			<td align="center">76.08</td>
-			<td align="center">67.57</td>
-			<td align="center">89.69</td>
-			<td align="center"><a href="https://pan.baidu.com/s/1eqt2U2gIBeE_UMtluCKIcQ">model</a>&nbsp;|&nbsp;xnvs</td>
+			<td align="center">1.95</td>
+			<td align="center">0.23</td>
+			<td align="center">23.88</td>
+			<td align="center">81.73</td>
+			<td align="center">56.53</td>
+			<td align="center">45.15</td>
+			<td align="center">70.40</td>
+			<td align="center"><a href="https://pan.baidu.com/s/1c-AWtejmmQs2pk_uNu_kYA">model</a>&nbsp;|&nbsp;wka6</td>
 		</tr>
 	</tbody>
 </table>
@@ -194,14 +194,14 @@ There are some difference between this implementation and official implementatio
 		<!-- ROW: r152 -->
 		<tr>
 			<td align="center"><a href="configs/r152_cityscapes.yaml">R152</a></td>
-			<td align="center">1.35</td>
-			<td align="center">0.16</td>
+			<td align="center">1.37</td>
+			<td align="center">0.15</td>
 			<td align="center">18.87</td>
-			<td align="center">94.80</td>
-			<td align="center">78.21</td>
-			<td align="center">70.06</td>
-			<td align="center">90.52</td>
-			<td align="center"><a href="https://pan.baidu.com/s/1PsAnXAv3dTI4gKi87rZjMQ">model</a>&nbsp;|&nbsp;y82y</td>
+			<td align="center">95.48</td>
+			<td align="center">82.97</td>
+			<td align="center">75.12</td>
+			<td align="center">91.68</td>
+			<td align="center"><a href="https://pan.baidu.com/s/1k6wIhyJfRLtr9WY_SoZNIw">model</a>&nbsp;|&nbsp;vqeq</td>
 		</tr>
 	</tbody>
 </table>
