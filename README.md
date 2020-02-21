@@ -96,7 +96,7 @@ There are some difference between this implementation and official implementatio
 1. The image sizes of `Multi-Scale Training` are (640, 672, 704, 736, 768, 800) for `coco` dataset;
 2. The image sizes of `Multi-Scale Training` are (800, 832, 864, 896, 928, 960, 992, 1024) for `cityscapes` dataset;
 3. No `RandomCrop` used;
-4. Learning rate policy is `WarmupCosineLR`;
+4. Learning rate policy is `WarmupCosineLR`.
 
 ### COCO
 <table>
